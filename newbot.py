@@ -9,6 +9,10 @@ dotenv.load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 TARGET_CHANNEL_ID = 605114288142811173
+VOICE_CHANNEL_ID = 605114466719498263
+
+# global variable for the music playing feature
+playingMusic = False
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -49,7 +53,7 @@ async def on_voice_state_update(member,before,after):
         return
 
     # returns if My Pants channel is not involved
-    if beforeChannelId != 605114466719498263 and afterChannelId != 605114466719498263:
+    if beforeChannelId != VOICE_CHANNEL_ID and afterChannelId != VOICE_CHANNEL_ID:
         print('My Pants channel was not involved')
         return
 
@@ -59,7 +63,7 @@ async def on_voice_state_update(member,before,after):
         return
     
     # someone joined channel
-    if afterChannelId == 605114466719498263:
+    if afterChannelId == VOICE_CHANNEL_ID:
         print('Someone joined the channel.')
         joinedUserid = member.id
         vc = after.channel
@@ -81,12 +85,15 @@ async def on_voice_state_update(member,before,after):
                 soundpath += "g.ogg"
             case 219653760312410113:
                 print('Mark joined')
+                soundpath += "fortnite.ogg"
             case 113827762648776707:
                 print('Austin joined')
             case 160800489737420800:
                 print('Gio joined')
+                soundpath += "goopman.ogg"
             case 340299484028207105:
                 print('Alex joined')
+                soundpath += "alex.ogg"
             case 147562375971602432:
                 print('Paul K joined')
                 soundpath += "holymoly.ogg"
@@ -99,16 +106,18 @@ async def on_voice_state_update(member,before,after):
         
         if vcConnection and len(soundpath) > 9:
             vcConnection.play(discord.FFmpegPCMAudio(executable="./bin/ffmpeg/ffmpeg.exe",source=soundpath))
+        return
             
 
     # someone left channel
-    if beforeChannelId == 605114466719498263:
+    if beforeChannelId == VOICE_CHANNEL_ID:
         print('Someone left the channel')
         if len(before.channel.members) == 1: #when bot can actually connect, change this to 1
             print('Channel empty')
             print('Disconnecting from channel...')
             connectedVC = client.voice_clients[0]
             await connectedVC.disconnect()
+        return
 
     '''print(f'Member info: {member.id}')
     print(f'Before info: {before.channel.id if before.channel is not None else defaultVal}')
