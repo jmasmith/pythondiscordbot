@@ -41,7 +41,6 @@ client = commands.Bot(command_prefix="$",intents=intents)
 # runs when bot is ready to go
 @client.event
 async def on_ready():
-    await client.tree.sync()
     print(f'We have logged in as {client.user}')
 
 # command to play youtube music
@@ -89,7 +88,7 @@ async def play(interaction: discord.Interaction, song_query:str):
     if voice_client.is_playing() or voice_client.is_paused():
         await interaction.followup.send(f"Added to queue: **{title}**")
     else:
-        #await interaction.followup.send(f"Now playing: **{title}**")
+        await interaction.followup.send(f"Now playing: **{title}**")
         await play_next(voice_client,guild_id,interaction.channel)
 
     '''
@@ -154,16 +153,16 @@ async def stop(interaction: discord.Interaction):
 
     await interaction.followup.send("Stopped playback and cleared the queue")
 
-# runs when message is sent
-# checks if message was sent from bot itself to prevent infinite looping
-# otherwise, if message is '$newbot test' in botspam channel, responds with Hello!
+# syncs the command tree
 @client.event
 async def on_message(message):
-    if message.author.id == client.user.id:
+    if message.author.id == client.user.id or message.author.id != 110106223109496832:
         return
 
-    if message.channel.id == TARGET_CHANNEL_ID and message.content.startswith('$newbot test'):
-        await message.channel.send('Hello!')
+    if message.channel.id == TARGET_CHANNEL_ID and message.content.startswith('$syncTree'):
+        guild = message.guild
+        await client.tree.sync(guild=guild)
+        await message.channel.send('Command tree synced')
 
 # TODO: listen for voice state changes
 # if someone joins the main channel, play sound dependent on who it is
@@ -172,6 +171,7 @@ async def on_message(message):
 @client.event
 async def on_voice_state_update(member,before,after):
     defaultVal = 'None'
+    guild_id_str = GUILD_ID
     beforeChannelId = before.channel.id if before.channel else -1
     afterChannelId = after.channel.id if after.channel else -1
 
@@ -195,9 +195,10 @@ async def on_voice_state_update(member,before,after):
         
         joinedUserid = member.id
         vc = after.channel
-        vcConnection = None
 
-        if len(after.channel.members) == 1:
+        vcConnection = client.voice_clients[0] if len(client.voice_clients) > 0 else None
+
+        if len(after.channel.members) >= 1 and vcConnection is None:
             print('Channel no longer empty.')
             print('Connecting to voice channel...')
             try:
@@ -206,7 +207,7 @@ async def on_voice_state_update(member,before,after):
                 print(f'Couldn\'t connect: {e}')
                 return
             
-        vcConnection = client.voice_clients[0]
+        # vcConnection = client.voice_clients[0]
         soundpath = "./sounds/"
 
         time.sleep(0.6)
@@ -244,10 +245,10 @@ async def on_voice_state_update(member,before,after):
                 print(f"Couldn't play sound. Error: {e}")
 
         # check if any songs are queued
-        guild_id_str = str(GUILD_ID)
+        
         if SONG_QUEUES.get(guild_id_str) is not None:
             botspamChannel = client.get_channel(605114288142811173)
-            await play_next(vcConnection,str(GUILD_ID),botspamChannel)
+            await play_next(vcConnection,guild_id_str,botspamChannel)
         
         return
             
@@ -255,10 +256,11 @@ async def on_voice_state_update(member,before,after):
     # someone left channel
     if beforeChannelId == VOICE_CHANNEL_ID:
         print('Someone left the channel')
-        if len(before.channel.members) == 1: #when bot can actually connect, change this to 1
+        if len(before.channel.members) == 1 and len(client.voice_clients) > 0: #when bot can actually connect, change this to 1
             print('Channel empty')
             print('Disconnecting from channel...')
             connectedVC = client.voice_clients[0]
+            SONG_QUEUES[guild_id_str].clear()
             await connectedVC.disconnect()
         return
 
