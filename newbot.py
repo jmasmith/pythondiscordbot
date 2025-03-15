@@ -2,6 +2,7 @@ import os
 import discord
 import dotenv
 import time
+import random
 from discord.ext import commands
 from discord import app_commands
 import yt_dlp
@@ -28,10 +29,8 @@ GUILD_ID = "604123366974160914"
 TARGET_CHANNEL_ID = 605114288142811173
 
 # change this to modify the voice channel it joins
+#   604123367615758361
 VOICE_CHANNEL_ID = 605114466719498263
-
-# global variable for the music playing feature
-#playingMusic = False
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -93,19 +92,6 @@ async def play(interaction: discord.Interaction, song_query:str):
     else:
         await interaction.followup.send(f"Searching for **{title}**...")
         await play_next(voice_client,guild_id,interaction.channel)
-
-    '''
-    ffmpeg_options = {
-        "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-        "options": "-vn -c:a libopus -b:a 96k",
-    }
-
-    source = discord.FFmpegOpusAudio(audio_url,**ffmpeg_options,executable="./bin/ffmpeg/ffmpeg.exe")
-
-    voice_client.play(source)
-    await interaction.followup.send(f"Playing: {title}")
-    '''
-
     #await interaction.response.send_message(f"This command doesn't do anything yet, {username}")
 
 @client.tree.command(name="skip",description="Skips currently playing song")
@@ -157,6 +143,7 @@ async def stop(interaction: discord.Interaction):
     await interaction.followup.send("Stopped playback and cleared the queue")
 
 # syncs the command tree
+# only I can do it to avoid being rate limited
 @client.event
 async def on_message(message):
     if message.author.id == client.user.id or message.author.id != 110106223109496832:
@@ -167,10 +154,7 @@ async def on_message(message):
         await client.tree.sync(guild=guild)
         await message.channel.send('Command tree synced')
 
-# TODO: listen for voice state changes
-# if someone joins the main channel, play sound dependent on who it is
-# if last person leaves main channel, disconnect from voice
-# if first person joins main channel, connect to voice
+# listens for when users join, leave, or otherwise do something within a voice channel
 @client.event
 async def on_voice_state_update(member,before,after):
     defaultVal = 'None'
@@ -195,12 +179,12 @@ async def on_voice_state_update(member,before,after):
     # someone joined channel
     if afterChannelId == VOICE_CHANNEL_ID:
         print('Someone joined the channel.')
-        
         joinedUserid = member.id
         vc = after.channel
-
         vcConnection = client.voice_clients[0] if len(client.voice_clients) > 0 else None
 
+        # joins the voicechat if it's not empty AND
+        # it isn't currently connected
         if len(after.channel.members) >= 1 and vcConnection is None:
             print('Channel no longer empty.')
             print('Connecting to voice channel...')
@@ -212,7 +196,8 @@ async def on_voice_state_update(member,before,after):
             
         # vcConnection = client.voice_clients[0]
         soundpath = "./sounds/"
-
+        
+        # short delay so user can hear their own sound
         time.sleep(0.6)
         match joinedUserid:
             case 110106223109496832:
@@ -224,23 +209,79 @@ async def on_voice_state_update(member,before,after):
             case 113827762648776707:
                 print('Austin joined')
                 soundpath += "brothaeugh.ogg"
-            case 160800489737420800:
+            case 164219024371220480:
+                print('Timmy joined')
+                sountpath += "timmy.mp3"
+            case 160800489737420800: #gio
                 print('Gio joined')
-                soundpath += "goopman.mp3"
-            case 340299484028207105:
+                rng = random.randrange(42)
+                if rng >= 0 and rng < 21:
+                    soundpath += "gio/goopman.mp3"
+                elif rng == 21 or rng == 22:
+                    soundpath += "gio/gio1.ogg"
+                elif rng == 23 or rng == 24:
+                    soundpath += "gio/gio2.ogg"
+                elif rng == 25 or rng == 26:
+                    soundpath += "gio/gio3.ogg"
+                elif rng == 27 or rng == 28:
+                    soundpath += "gio/gio4.ogg"
+                elif rng == 29 or rng == 30:
+                    soundpath += "gio/gio5.ogg"
+                elif rng == 31 or rng == 32:
+                    soundpath += "gio/gio6.ogg"
+                elif rng == 33 or rng == 34:
+                    soundpath += "gio/gio7.ogg"
+                elif rng == 35 or rng == 36:
+                    soundpath += "gio/gio8.ogg"
+                elif rng == 37 or rng == 38:
+                    soundpath += "gio/gio9.ogg"
+                elif rng == 39 or rng == 40:
+                    soundpath += "gio/gio10.ogg"
+                else:
+                    soundpath += "gio/giobad.ogg"
+            case 340299484028207105: #alex
                 print('Alex joined')
-                soundpath += "alex.ogg"
-            case 147562375971602432:
+                rng = random.randrange(3)
+                if rng == 0:
+                    soundpath += "alex/alex.ogg"
+                elif rng == 1:
+                    soundpath += "alex/alexwhy.ogg"
+                else:
+                    soundpath += "alex/whatda.ogg"
+            case 147562375971602432: #paul
                 print('Paul K joined')
-                soundpath += "holymoly.ogg"
-            case 160800395134763008:
+                rng = random.randrange(100)
+                if rng >= 0 and rng < 50:
+                    soundpath += "paulk/holymoly.ogg"
+                elif rng >= 50 and rng < 80:
+                    soundpath += "paulk/loser.mp3"
+                elif rng >= 80 and rng < 98:
+                    soundpath += "paulk/eldenring.ogg"
+                elif rng == 98:
+                    soundpath += "paulk/metalpipe.mp3"
+                else:
+                    soundpath += "paulk/paulbad2.ogg"
+            case 220701662338220033: #timk
+                print("Tim K joined")
+                rng = random.randrange(2)
+                if rng == 0:
+                    soundpath += "timk/boom.mp3"
+                else:
+                    soundpath += "timk/prowler.mp3"
+            case 160800395134763008: #tristen
                 print('Tristen joined')
-                soundpath += "tristen.mp3"
+                rng = random.randrange(5)
+                if rng >= 0 and rng < 4:
+                    soundpath += "tristen/maidenless.mp3"
+                else:
+                    soundpath += "tristen/mario.mp3"
             case 213510490775617536:
                 print('Shannon joined')
             case _:
                 print('this guy needs a sound')
         
+        # if there is a voice connection AND a soundpath
+        # was chosen AND the bot isn't currently playing a song, play a sound
         if vcConnection and len(soundpath) > 9 and not vcConnection.is_playing():
             try:
                 vcConnection.play(discord.FFmpegPCMAudio(executable="./bin/ffmpeg/ffmpeg.exe",source=soundpath))
@@ -248,7 +289,6 @@ async def on_voice_state_update(member,before,after):
                 print(f"Couldn't play sound. Error: {e}")
 
         # check if any songs are queued
-        
         if SONG_QUEUES.get(guild_id_str) is not None:
             botspamChannel = client.get_channel(605114288142811173)
             await play_next(vcConnection,guild_id_str,botspamChannel)
