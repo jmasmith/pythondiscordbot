@@ -20,11 +20,14 @@ async def search_ytdlp_async(query,ydl_opts):
 
 def _extract(query,ydl_opts):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        # if this doesn't work, pull it out of the sanitize_info function
         return ydl.sanitize_info(ydl.extract_info(query,download=False))
 
 GUILD_ID = "604123366974160914"
+
+# change this to modify the channel to listen to for commands
 TARGET_CHANNEL_ID = 605114288142811173
+
+# change this to modify the voice channel it joins
 VOICE_CHANNEL_ID = 605114466719498263
 
 # global variable for the music playing feature
@@ -52,7 +55,7 @@ async def play(interaction: discord.Interaction, song_query:str):
     username = interaction.user.mention
 
     if vc is None or vc.channel.id != VOICE_CHANNEL_ID:
-        await interaction.followup.send("You gotta be in the No Pants channel, stupid")
+        await interaction.followup.send(f"You gotta be in the main voice channel, {username}")
         return
     
     voice_client = interaction.guild.voice_client
@@ -88,7 +91,7 @@ async def play(interaction: discord.Interaction, song_query:str):
     if voice_client.is_playing() or voice_client.is_paused():
         await interaction.followup.send(f"Added to queue: **{title}**")
     else:
-        await interaction.followup.send(f"Now playing: **{title}**")
+        await interaction.followup.send(f"Searching for **{title}**...")
         await play_next(voice_client,guild_id,interaction.channel)
 
     '''
@@ -118,7 +121,7 @@ async def pause(interaction: discord.Interaction):
     voice_client = interaction.guild.voice_client
 
     if voice_client is None:
-        return await interaction.response.send_message("I'm not in any voice channels bitch")
+        return await interaction.response.send_message("I can't pause anything if I'm not in a voice chat lol")
     if not voice_client.is_playing():
         return await interaction.response.send_message("Nothing is playing")
     
@@ -130,7 +133,7 @@ async def resume(interaction: discord.Interaction):
     voice_client = interaction.guild.voice_client
 
     if voice_client is None:
-        return await interaction.response.send_message("I'm not in any voice channels bitch")
+        return await interaction.response.send_message("I can't resume anything if I'm not in a voice chat lol")
     if not voice_client.is_paused():
         return await interaction.response.send_message("I'm not paused")
     
@@ -143,7 +146,7 @@ async def stop(interaction: discord.Interaction):
     voice_client = interaction.guild.voice_client
 
     if not voice_client or not voice_client.is_connected():
-        return await interaction.followup.send("I'm not in any voice channels bitch")
+        return await interaction.followup.send("I can't stop anything if I'm not in a voice chat lol")
     
     guild_id_str = str(interaction.guild_id)
     if guild_id_str in SONG_QUEUES:
@@ -181,7 +184,7 @@ async def on_voice_state_update(member,before,after):
 
     # returns if My Pants channel is not involved
     if beforeChannelId != VOICE_CHANNEL_ID and afterChannelId != VOICE_CHANNEL_ID:
-        print('My Pants channel was not involved')
+        print('Main voice channel was not involved')
         return
 
     # if someone mutes or deafens, do nothing
