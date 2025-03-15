@@ -200,9 +200,13 @@ async def on_voice_state_update(member,before,after):
         # short delay so user can hear their own sound
         time.sleep(0.6)
         match joinedUserid:
-            case 110106223109496832:
+            case 110106223109496832: #josh
                 print('Josh joined')
-                soundpath += "g.ogg"
+                rng = random.randrange(2)
+                if rng == 0:
+                    soundpath += "josh/g.ogg"
+                else:
+                    soundpath += "josh/bhfbo.mp3"
             case 219653760312410113:
                 print('Mark joined')
                 soundpath += "fortnite.ogg"
