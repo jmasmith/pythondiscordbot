@@ -29,8 +29,8 @@ GUILD_ID = "604123366974160914"
 TARGET_CHANNEL_ID = 605114288142811173
 
 # change this to modify the voice channel it joins
-#   604123367615758361
-VOICE_CHANNEL_ID = 605114466719498263
+#   605114466719498263   
+VOICE_CHANNEL_ID = 604123367615758361
 
 intents = discord.Intents.default()
 intents.message_content = True
