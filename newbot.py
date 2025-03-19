@@ -212,7 +212,7 @@ async def on_voice_state_update(member,before,after):
                 soundpath += "fortnite.ogg"
             case 113827762648776707:
                 print('Austin joined')
-                soundpath += "brothaeugh.ogg"
+                soundpath += "austin.mp3"
             case 164219024371220480:
                 print('Timmy joined')
                 sountpath += "timmy.mp3"
