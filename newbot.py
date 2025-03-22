@@ -281,6 +281,7 @@ async def on_voice_state_update(member,before,after):
                     soundpath += "tristen/mario.mp3"
             case 213510490775617536:
                 print('Shannon joined')
+                soundpath += "shannon.mp3"
             case _:
                 print('this guy needs a sound')
         
