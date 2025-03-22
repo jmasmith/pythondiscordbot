@@ -215,7 +215,7 @@ async def on_voice_state_update(member,before,after):
                 soundpath += "austin.mp3"
             case 164219024371220480:
                 print('Timmy joined')
-                sountpath += "timmy.mp3"
+                soundpath += "timmy.mp3"
             case 160800489737420800: #gio
                 print('Gio joined')
                 rng = random.randrange(42)
