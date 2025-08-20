@@ -11,7 +11,7 @@ from collections import deque
 
 
 dotenv.load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 SONG_QUEUES = {}
 
@@ -202,8 +202,8 @@ async def on_voice_state_update(member,before,after):
         match joinedUserid:
             case 110106223109496832: #josh
                 print('Josh joined')
-                rng = random.randrange(2)
-                if rng == 0:
+                rng = random.randrange(4)
+                if rng < 3:
                     soundpath += "josh/g.ogg"
                 else:
                     soundpath += "josh/bhfbo.mp3"
@@ -224,7 +224,7 @@ async def on_voice_state_update(member,before,after):
                 elif rng == 21 or rng == 22:
                     soundpath += "gio/gio1.ogg"
                 elif rng == 23 or rng == 24:
-                    soundpath += "gio/gio2.ogg"
+                    soundpath += "gio/gioq.mp3"
                 elif rng == 25 or rng == 26:
                     soundpath += "gio/gio3.ogg"
                 elif rng == 27 or rng == 28:
@@ -257,7 +257,9 @@ async def on_voice_state_update(member,before,after):
                 rng = random.randrange(100)
                 if rng >= 0 and rng < 50:
                     soundpath += "paulk/holymoly.ogg"
-                elif rng >= 50 and rng < 80:
+                elif rng >= 50 and rng < 52:
+                    soundpath += "paulk/paulp.mp3"
+                elif rng >= 52 and rng < 80:
                     soundpath += "paulk/loser.mp3"
                 elif rng >= 80 and rng < 98:
                     soundpath += "paulk/eldenring.ogg"
@@ -282,14 +284,19 @@ async def on_voice_state_update(member,before,after):
             case 213510490775617536:
                 print('Shannon joined')
                 soundpath += "shannon.mp3"
+            case 178691127166238720:
+                print('Ruben joined')
+                soundpath += "ruben.mp3"
             case _:
                 print('this guy needs a sound')
         
         # if there is a voice connection AND a soundpath
         # was chosen AND the bot isn't currently playing a song, play a sound
+        # executable="/usr/src/app/bin/ffmpeg/ffmpeg.exe",
+
         if vcConnection and len(soundpath) > 9 and not vcConnection.is_playing():
             try:
-                vcConnection.play(discord.FFmpegPCMAudio(executable="./bin/ffmpeg/ffmpeg.exe",source=soundpath))
+                vcConnection.play(discord.FFmpegPCMAudio(source=soundpath))
             except Exception as e:
                 print(f"Couldn't play sound. Error: {e}")
 
@@ -308,7 +315,9 @@ async def on_voice_state_update(member,before,after):
             print('Channel empty')
             print('Disconnecting from channel...')
             connectedVC = client.voice_clients[0]
-            SONG_QUEUES[guild_id_str].clear()
+
+            if guild_id_str in SONG_QUEUES:
+                SONG_QUEUES[guild_id_str].clear()
             await connectedVC.disconnect()
         return
 
@@ -320,7 +329,7 @@ async def play_next(voice_client,guild_id,channel):
             "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
             "options": "-vn -c:a libopus -b:a 96k",
         }
-        source = discord.FFmpegOpusAudio(audio_url,**ffmpeg_options,executable="./bin/ffmpeg/ffmpeg.exe")
+        source = discord.FFmpegOpusAudio(audio_url,**ffmpeg_options)
 
         def after_play(error):
             if error:
